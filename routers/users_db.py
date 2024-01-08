@@ -1,4 +1,4 @@
-from fastapi import APIRouter,HTTPException
+from fastapi import APIRouter,HTTPException,Response
 from db.models.user import User
 from db.client import db_users_client
 from db.schemas.user import user_schema, users_schema
@@ -29,7 +29,7 @@ def get_user_object(key: str, value: Union[str, None]):
 #CRUD USERS
 
 
-@router.get("/")
+@router.get("/",response_class=Response, response_model=list[User])
 async def get_users():
   try:
     users = db_users_client.user.find()
@@ -45,7 +45,7 @@ async def get_user(id : str):
     raise HTTPException(status_code=404, detail="user not found")
   
 
-@router.post("/", response_model=User, status_code=201)
+@router.post("/",response_class = Response, response_model=User, status_code=201)
 async def create_user(user : User):
   if type(search_user("email", user.email)) == User:
     raise HTTPException(status_code=406, detail="user already exists")
