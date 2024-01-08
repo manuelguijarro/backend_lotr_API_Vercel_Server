@@ -35,8 +35,10 @@ def get_user_object(key: str, value: Union[str, None]):
 @router.get("/",response_class=Response, response_model=list[User])
 async def get_users():
   cache_control = "max-age=10"
+  hsts_header = "max-age=63072000; includeSubDomains; preload"
   headers = {
-        "Cache-Control": cache_control
+        "Cache-Control": cache_control,
+        "Strict-Transport-Security": hsts_header
     }
 
   try:
