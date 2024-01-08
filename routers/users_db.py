@@ -59,10 +59,22 @@ async def create_user(user : User):
   except:
     raise HTTPException(status_code=400, detail="error creating user")
  
-@router.put("/{username}")
-async def update_user(username: str):
-  return {"message": "Hello from update users db", "username": username}
-
+@router.put("/{username}", response_model=User)
+async def update_user(username : str, user : User):
+  if type(search_user("username", username)) == User:
+    try:
+      user_dict = dict(user)
+      del user_dict['id']
+      db_users_client.user.find_one_and_replace({"_id": ObjectId(user.id)}, user_dict)
+      return search_user("_id", ObjectId(user.id))
+    except:
+      raise HTTPException(status_code=404, detail="user not found")
+    
 @router.delete("/{id}")
-async def delete_user(id: str):
-  return {"message": "Hello from delete users db", "id": id}
+async def delete_user(id : str):
+  try:
+    user_obj = get_user_object("_id", ObjectId(id))
+    db_users_client.user.find_one_and_delete({"_id": ObjectId(id)})
+    return {"message": "user deleted", "user": user_obj}
+  except:
+    raise HTTPException(status_code=404, detail="user not found")
