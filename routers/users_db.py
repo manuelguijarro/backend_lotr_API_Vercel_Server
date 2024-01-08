@@ -2,14 +2,23 @@ from fastapi import APIRouter,HTTPException
 from db.models.user import User
 from db.client import db_users_client
 from db.schemas.user import user_schema, users_schema
+from bson import ObjectId
+
+
 router = APIRouter(
   prefix="/users",
   tags=["users"]
 )
-usuario = User(id="1", username="johndoe", email="johndoe@me.com", password="secret", created_at="2021-01-01")
+
+
+
 @router.get("/")
 async def get_users():
-  return {"message": "Hello from users db", "users": [usuario.dict()]}
+  try:
+    users = db_users_client.user.find()
+    return users_schema(users)
+  except:
+    raise HTTPException(status_code=404, detail="Users not found")
 
 @router.get("/{id}")
 async def get_user(id: str):
