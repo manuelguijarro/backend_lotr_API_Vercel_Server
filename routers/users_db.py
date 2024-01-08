@@ -1,9 +1,22 @@
-from fastapi import APIRouter,HTTPException,Response
+from fastapi import APIRouter,HTTPException,Response,requests
 from db.models.user import User
 from db.client import db_users_client
 from db.schemas.user import user_schema, users_schema
 from bson import ObjectId
 from typing import Union
+
+
+
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from fastapi_cache.decorator import cache
+
+from redis import asyncio as aioredis
+
+@cache()
+async def get_cache():
+    return 1
+
 
 
 router = APIRouter(
@@ -30,6 +43,7 @@ def get_user_object(key: str, value: Union[str, None]):
 
 
 @router.get("/",response_class=Response, response_model=list[User])
+@cache(expire=60)
 async def get_users():
   try:
     users = db_users_client.user.find()
@@ -47,6 +61,7 @@ async def get_user(id : str):
 
 @router.post("/",response_class = Response, response_model=User, status_code=201)
 async def create_user(user : User):
+  
   if type(search_user("email", user.email)) == User:
     raise HTTPException(status_code=406, detail="user already exists")
   try:
@@ -78,3 +93,8 @@ async def delete_user(id : str):
     return {"message": "user deleted", "user": user_obj}
   except:
     raise HTTPException(status_code=404, detail="user not found")
+  
+@router.on_event("startup")
+async def startup():
+    redis = aioredis.from_url("redis://localhost")
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
