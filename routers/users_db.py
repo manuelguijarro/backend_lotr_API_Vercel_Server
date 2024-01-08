@@ -37,15 +37,28 @@ async def get_users():
   except:
     raise HTTPException(status_code=404, detail="Users not found")
 
-@router.get("/{id}")
-async def get_user(id: str):
-  return {"message": "Hello from users db", "id": id}
+@router.get("/{id}", response_model=User)
+async def get_user(id : str):
+  try:
+    return search_user("_id", ObjectId(id))
+  except:
+    raise HTTPException(status_code=404, detail="user not found")
+  
 
-
-@router.post("/")
-async def create_user():
-  return {"message": "Hello from create users db"}
-
+@router.post("/", response_model=User, status_code=201)
+async def create_user(user : User):
+  if type(search_user("email", user.email)) == User:
+    raise HTTPException(status_code=406, detail="user already exists")
+  try:
+    user_dict = dict(user)
+    del user_dict['id']
+    #primero lo guardo en la base de datos y obtengo el id despues.
+    id = db_users_client.user.insert_one(user_dict).inserted_id
+    new_user = user_schema(db_users_client.user.find_one({"_id": id}))
+    return User(**new_user)#y devolvemos el nuevo usuario creado
+  except:
+    raise HTTPException(status_code=400, detail="error creating user")
+ 
 @router.put("/{username}")
 async def update_user(username: str):
   return {"message": "Hello from update users db", "username": username}
