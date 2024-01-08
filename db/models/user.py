@@ -1,9 +1,9 @@
 from pydantic import BaseModel
-
+from typing import Union
 class User(BaseModel):
-  id: str | None
+  id: Union[str, None]
   username: str
   email: str
   password: str
-  created_at: str | None
+  created_at: Union[str, None]
   
