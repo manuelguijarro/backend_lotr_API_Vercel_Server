@@ -3,6 +3,7 @@ from db.models.user import User
 from db.client import db_users_client
 from db.schemas.user import user_schema, users_schema
 from bson import ObjectId
+from typing import Union
 
 
 router = APIRouter(
@@ -10,6 +11,22 @@ router = APIRouter(
   tags=["users"]
 )
 
+#functions
+def search_user(key: str, value:Union[str, None]):
+  try:
+    user = db_users_client.user.find_one({key: value})
+    return User(**user_schema(user))
+  except:
+    return {"error": "user not found"}
+  
+def get_user_object(key: str, value: Union[str, None]):
+  try:
+    user = db_users_client.user.find_one({key: value})
+    return User(**user_schema(user))
+  except:
+    return {"error": "user not found"}
+
+#CRUD USERS
 
 
 @router.get("/")
