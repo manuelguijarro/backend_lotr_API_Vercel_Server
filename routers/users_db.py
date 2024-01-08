@@ -4,7 +4,7 @@ from db.client import db_users_client
 from db.schemas.user import user_schema, users_schema
 from bson import ObjectId
 from typing import Union
-
+from fastapi.responses import JSONResponse
 
 
 
@@ -34,9 +34,15 @@ def get_user_object(key: str, value: Union[str, None]):
 
 @router.get("/",response_class=Response, response_model=list[User])
 async def get_users():
+  cache_control = "max-age=10"
+  headers = {
+        "Cache-Control": cache_control
+    }
+
   try:
     users = db_users_client.user.find()
-    return users_schema(users)
+    new_user = users_schema(users)
+    return JSONResponse(content=new_user, headers=headers)
   except:
     raise HTTPException(status_code=404, detail="Users not found")
 
