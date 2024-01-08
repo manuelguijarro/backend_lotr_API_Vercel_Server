@@ -1,14 +1,14 @@
 from fastapi import APIRouter,HTTPException
-
+from db.models.user import User
 
 router = APIRouter(
   prefix="/users",
   tags=["users"]
 )
-
+usuario = User(id="1", username="johndoe", email="johndoe@me.com", password="secret", created_at="2021-01-01")
 @router.get("/")
 async def get_users():
-  return {"message": "Hello from users db"}
+  return {"message": "Hello from users db", "users": [usuario.dict()]}
 
 @router.get("/{id}")
 async def get_user(id: str):
