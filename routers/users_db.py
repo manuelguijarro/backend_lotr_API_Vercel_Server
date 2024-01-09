@@ -32,23 +32,22 @@ def get_user_object(key: str, value: Union[str, None]):
 #CRUD USERS
 
 
-@router.get("/",response_class=Response, response_model=list[User])
-@cache
+@router.get("/", response_class=Response, response_model=list[User])
+@cache(key="users")
 async def get_users():
-  cache_control = "max-age=10"
-  hsts_header = "max-age=63072000; includeSubDomains; preload"
-  headers = {
+    cache_control = "max-age=10"
+    hsts_header = "max-age=63072000; includeSubDomains; preload"
+    headers = {
         "Cache-Control": cache_control,
         "Strict-Transport-Security": hsts_header
     }
 
-  try:
-    users = db_users_client.user.find()
-    new_user = users_schema(users)
-    return JSONResponse(content=new_user, headers=headers)
-  except:
-    raise HTTPException(status_code=404, detail="Users not found")
-
+    try:
+        users = db_users_client.user.find()
+        new_user = users_schema(users)
+        return JSONResponse(content=new_user, headers=headers)
+    except:
+        raise HTTPException(status_code=404, detail="Users not found")
 @router.get("/{id}", response_model=User)
 async def get_user(id : str):
   try:
