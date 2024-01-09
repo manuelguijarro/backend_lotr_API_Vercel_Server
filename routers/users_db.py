@@ -5,10 +5,10 @@ from db.schemas.user import user_schema, users_schema
 from bson import ObjectId
 from typing import Union
 from fastapi.responses import JSONResponse
+from fastapi_redis_cache import FastApiRedisCache, cache
 
 
-
-
+LOCAL_REDIS_URL = "https://backend-lotr-api-vercel-server.vercel.app/"
 router = APIRouter(
   prefix="/users",
   tags=["users"]
@@ -33,6 +33,7 @@ def get_user_object(key: str, value: Union[str, None]):
 
 
 @router.get("/",response_class=Response, response_model=list[User])
+@cache
 async def get_users():
   cache_control = "max-age=10"
   hsts_header = "max-age=63072000; includeSubDomains; preload"

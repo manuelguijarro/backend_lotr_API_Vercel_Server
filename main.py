@@ -5,8 +5,10 @@ from routers.users_db import router as user_router
 from fastapi.middleware.cors import CORSMiddleware
 from cache_fastapi.cacheMiddleware import CacheMiddleware
 app = FastAPI() # This is what will be refrenced in config
-origins = ["https://backend-lotr-api-vercel-server.vercel.app/"]
 app.include_router(user_router)
+"""
+origins = ["https://backend-lotr-api-vercel-server.vercel.app/"]
+
 cached_endpoints = [
     "/routers/"
 ]
@@ -21,6 +23,8 @@ app.add_middleware(
 )
 """
 app.add_middleware(CacheMiddleware, cached_endpoints=cached_endpoints)
+"""
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
